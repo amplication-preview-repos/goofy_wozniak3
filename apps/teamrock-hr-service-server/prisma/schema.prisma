@@ -1,0 +1,90 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Question {
+  id        String     @id @default(cuid())
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  text      String?
+  survey    Survey?    @relation(fields: [surveyId], references: [id])
+  surveyId  String?
+  responses Response[]
+}
+
+model Reminder {
+  id         String    @id @default(cuid())
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  content    String?
+  sentAt     DateTime?
+  employee   Employee? @relation(fields: [employeeId], references: [id])
+  employeeId String?
+}
+
+model Survey {
+  id          String               @id @default(cuid())
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  title       String?
+  description String?
+  frequency   EnumSurveyFrequency?
+  questions   Question[]
+  responses   Response[]
+}
+
+model Employee {
+  id           String      @id @default(cuid())
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  firstName    String?
+  lastName     String?
+  email        String?
+  responses    Response[]
+  department   Department? @relation(fields: [departmentId], references: [id])
+  departmentId String?
+  reminders    Reminder[]
+}
+
+model Response {
+  id         String    @id @default(cuid())
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  answer     String?
+  employee   Employee? @relation(fields: [employeeId], references: [id])
+  employeeId String?
+  question   Question? @relation(fields: [questionId], references: [id])
+  questionId String?
+  survey     Survey?   @relation(fields: [surveyId], references: [id])
+  surveyId   String?
+}
+
+model Department {
+  id        String     @id @default(cuid())
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  name      String?
+  manager   String?
+  employees Employee[]
+}
+
+model User {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  firstName String?
+  lastName  String?
+  username  String   @unique
+  email     String?  @unique
+  password  String
+  roles     Json
+}
+
+enum EnumSurveyFrequency {
+  Option1
+}
